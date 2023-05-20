@@ -1,8 +1,11 @@
 import { useCallback, useState } from "react";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { dracula } from "react-syntax-highlighter/dist/cjs/styles/prism";
 
 export default function Home() {
   const n = 10;
   const [columns, setColumns] = useState(Array(4).fill(Array(n).fill(1)));
+  const [result, setResult] = useState({});
 
   const handleSelectChange = useCallback(
     (event: any, cIndex: number, rIndex: number) => {
@@ -58,6 +61,23 @@ export default function Home() {
     [columns, handleSelectChange, options]
   );
 
+  const handleSave = useCallback(() => {
+    const result: any = {};
+
+    Object.entries(columns).forEach(([aspectIndex, aspectValues]) => {
+      const aspectKey = `aspect_penilaian_${parseInt(aspectIndex) + 1}`;
+      result[aspectKey] = {};
+
+      Object.entries(aspectValues).forEach(
+        ([mahasiswaIndex, mahasiswaValue]) => {
+          const mahasiswaKey = `mahasiswa_${parseInt(mahasiswaIndex) + 1}`;
+          result[aspectKey][mahasiswaKey] = mahasiswaValue;
+        }
+      );
+    });
+    setResult(result);
+  }, [columns]);
+
   return (
     <main className={`flex min-h-screen flex-col p-4 lg:p-24`}>
       <h1 className={`text-2xl font-mono text-center mb-8`}>
@@ -86,7 +106,17 @@ export default function Home() {
         </table>
       </div>
 
-      <button className="btn btn-active btn-primary self-end mt-8 px-32">Simpan</button>
+      <button
+        onClick={handleSave}
+        className="btn btn-active btn-primary self-end my-8 px-32"
+      >
+        Simpan
+      </button>
+      {result && (
+        <SyntaxHighlighter language="json" style={dracula}>
+          {JSON.stringify(result, null, 2)}
+        </SyntaxHighlighter>
+      )}
     </main>
   );
 }
